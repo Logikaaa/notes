@@ -5,7 +5,8 @@ import json
 
 notes = {
     "Ілля Сидорчук": {
-        "текст": "Хороший хлопчик"
+        "текст": "Хороший хлопчик", 
+        "теги": "сміхотунчик"
     }
 }
 
@@ -25,6 +26,17 @@ button_note_del = QPushButton('Видалити замітку')
 button_note_save = QPushButton('Зберегти замітку')
 field_text = QTextEdit()
 
+
+field_tag = QLineEdit('')
+field_tag.setPlaceholderText('Введіть тег...')
+field_text = QTextEdit()
+button_tag_add = QPushButton('Додати до замітки')
+button_tag_del = QPushButton('Відкріпит від замітки')
+button_tag_search = QPushButton('Шукати замітки за тегом')
+list_tags = QListWidget()
+list_tag_label = QLabel('Список тегів')
+
+
 layout_notes = QHBoxLayout()
 col_1 = QVBoxLayout()
 col_1.addWidget(field_text)
@@ -41,8 +53,16 @@ row_2.addWidget(button_note_save)
 col_2.addLayout(row_1)
 col_2.addLayout(row_2)
 
+col_2.addWidget(list_tag_label)
+col_2.addWidget(list_tags)
+col_2.addWidget(field_tag)
+
+
 row_3 = QHBoxLayout()
+row_3.addWidget(button_tag_add)
+row_3.addWidget(button_tag_del)
 row_4 = QHBoxLayout()
+row_4.addWidget(button_tag_search)
 
 col_2.addLayout(row_3)
 col_2.addLayout(row_4)
@@ -86,10 +106,44 @@ def note_del():
     else:
         print('Замітка для вилучення не обрана!')
 
+
+def add_tag():
+    if list_notes.selectedItems():
+        key = layout_notes.selectedItems()[0].text()
+        tag = field_tag.text()
+        if not tag in notes[key]["теги"]:
+            notes[key]["теги"].append(tag)
+            list_tags.addItem(tag)
+            field_tag.clear
+        with open('notes_data.json', "w") as file:
+            json.dump(notes, file, sort_keys=True, ensure_ascii=False)
+        print(notes)
+    else:
+        print("Замітка для додавання тега не обрана!")
+
+def del_tag():
+    if list_tags.seLectedItems():
+        key = list_notes.selectedItems()[0].text()
+        tag = list_tags.selectedItems()[0].text()
+        notes[key]["теги"].remove(tag)
+        list_tags.clear()
+        list_tags.addItems(notes[key]["теги"])
+        with open("notes_data.json", "w") as file:
+            json.dump(notes,file, sort_keys=True, ensure_ascii=False)
+    else:
+        print("Теги для вилучення не обраний!")
+
+
+
+
 button_note_create.clicked.connect(add_note)
 list_notes.itemClicked.connect(show_note)
 button_note_save.clicked.connect(save_note)
 button_note_del.clicked.connect(note_del)
+button_tag_add.clicked.connect(add_tag)
+button_tag_del.clicked.connect(del_tag)
+
+
 
 with open('notes_data.json', 'r') as file:
     notes = json.load(file)
